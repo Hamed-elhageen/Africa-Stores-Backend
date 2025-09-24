@@ -1,6 +1,7 @@
 import { MongooseModule, Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Role } from "../enums/user.enum"
 import { HydratedDocument } from "mongoose"
+import { hash } from "src/common/security/hash.util"
 
 // schema class 
 @Schema({ timestamps: true })
@@ -22,6 +23,14 @@ export class User {
 }
 
 const userSchema = SchemaFactory.createForClass(User)
+
+userSchema.pre('save', function (next) {
+    if (this.isModified("password")) {
+        this.password = hash(this.password)
+    }
+    return next();
+}
+)
 export const UserModelName = User.name
 
 
