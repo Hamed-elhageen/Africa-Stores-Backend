@@ -3,11 +3,22 @@ import { AppModule } from './app.module';
 // import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
+import { ValidationException } from './common/exceptions/validation.exception';
+import { mapValidationErrors } from './common/utils/validation.mapper';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   // const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes( new ValidationPipe({whitelist: true ,forbidNonWhitelisted: true}) )
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    exceptionFactory: (errors) => {
+      const payload = mapValidationErrors(errors);
+      return new ValidationException(payload);
+    },
+  }));
+  app.useGlobalFilters(new AllExceptionsFilter());
   const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get<number>('PORT', 3000)
   await app.listen(port);
