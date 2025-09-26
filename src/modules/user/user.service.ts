@@ -19,6 +19,11 @@ export class UserService {
     }
     return user;
   }
+
+  async userExistByEmail(handle:string){
+    const user = await this._UserRepository.findOne({filter:{email:handle}})
+    return user;
+  }
   
 
 
