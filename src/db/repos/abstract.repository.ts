@@ -7,6 +7,7 @@ export type finderOneArg<TDocument> = {
     filter?: FilterQuery<TDocument>,
     populate?: any,
     select?: string,
+    projection?: any
 }
 export type findersArgs<TDocument> =
     finderOneArg<TDocument> & {
@@ -25,18 +26,21 @@ export type UpdateArgs<TDocument> = {
 
 export abstract class AbstractRepository<TDocument> {
     protected constructor(protected readonly model: Model<TDocument>) { }
-    async findAll({ filter = {}, populate, select, paginate, sort }: findersArgs<TDocument>): Promise<TDocument[] | any> {
+    async findAll({ filter = {}, populate, select, paginate, sort, projection }: findersArgs<TDocument>): Promise<TDocument[] | any> {
         let query = this.model.find(filter)
         if (select) query = query.select(select)
         if (populate) query = query.populate(populate)
         if (sort) query = query.sort(sort)
+        if (projection) query = query.select(projection)
         const data = await query.exec();
         return { data };
     }
-    async findOne({ filter = {}, populate, select }: finderOneArg<TDocument>): Promise<TDocument | null> {
+    async findOne({ filter = {}, populate, select, projection }: finderOneArg<TDocument>): Promise<TDocument | null> {
         let query = this.model.findOne(filter)
         if (select) query = query.select(select)
         if (populate) query = query.populate(populate)
+        if (projection) query = query.select(projection)
+
         return query.exec();
     }
 

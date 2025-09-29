@@ -6,6 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ValidationException } from './common/exceptions/validation.exception';
 import { mapValidationErrors } from './common/utils/validation.mapper';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { SuccessResponseInterceptor } from './common/interceptors/success-response.interceptor';
 
 async function bootstrap() {
   // const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -19,6 +20,7 @@ async function bootstrap() {
     },
   }));
   app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalInterceptors(new SuccessResponseInterceptor());
   const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get<number>('PORT', 3000)
   await app.listen(port);
