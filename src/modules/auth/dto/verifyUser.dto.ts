@@ -1,11 +1,10 @@
-import { IsEmail ,IsNotEmpty, IsString } from "class-validator"
+import { IsEmail  } from "class-validator"
+import { IsRequiredString } from "src/common/decorators/validation/is-required-string.decorator.ts"
 
 export class VerifyUserDto {
-    @IsNotEmpty()
     @IsEmail()
-    @IsString()
+    @IsRequiredString()
     handle:string 
-    @IsNotEmpty()
-    @IsString()
+    @IsRequiredString()
     code:string
 }

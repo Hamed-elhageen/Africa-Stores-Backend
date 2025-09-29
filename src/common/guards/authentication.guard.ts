@@ -6,7 +6,7 @@ import { Request } from "express";
 import { NotFoundError, Observable } from "rxjs";
 import { TokenRepository } from "src/db/repos/token.repository";
 import { UserRepository } from "src/db/repos/user.repository";
-import { IsPublicKey } from "../decorators/public.decorator";
+import { IsPublicKey } from "../decorators/auth/public.decorator";
 
 @Injectable()
 export class AuthGuard implements CanActivate {

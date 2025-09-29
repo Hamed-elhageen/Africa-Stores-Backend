@@ -6,8 +6,8 @@ import { SendOtpDto } from './dto/sendOtp.dto';
 import { VerifyUserDto } from './dto/verifyUser.dto';
 import { ResendOtpDto } from './dto/resendOtp.dto';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
-import { Public } from 'src/common/decorators/public.decorator';
-import { CurrentToken } from 'src/common/decorators/currentToken.decorator';
+import { Public } from 'src/common/decorators/auth/public.decorator';
+import { CurrentToken } from 'src/common/decorators/auth/currentToken.decorator';
 import type { tokenDocument } from 'src/db/models/token.model';
 
 @Controller('auth')
@@ -55,7 +55,7 @@ export class AuthController {
   resetPassword(@Body() data: ResetPasswordDto) {
     return this.authService.resetPassword(data);
   }
-  
+
   @Public()
   @Post("password/validate_code")
   validateCode(@Body() data: VerifyUserDto) {

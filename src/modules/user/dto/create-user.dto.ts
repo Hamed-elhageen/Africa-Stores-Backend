@@ -1,21 +1,20 @@
-import { IsEmail, IsIn, IsNotEmpty, IsString, ValidateIf } from "class-validator"
+import { Match } from 'src/common/decorators/validation/match.decorator';
+import { IsEmail, IsString } from "class-validator"
+import { IsRequiredString } from 'src/common/decorators/validation/is-required-string.decorator.ts';
+
 
 export class CreateUserDto {
-    @IsString()
-    @IsNotEmpty()
+    @IsRequiredString()
     name: string
 
-    @IsString()
-    @IsNotEmpty()
+    @IsRequiredString()
     @IsEmail()
     email: string
 
-    @IsString()
-    @IsNotEmpty()
+    @IsRequiredString()
     password: string
 
-    @IsString()
-    @IsIn([Math.random()], { message: "Passwords must match !" })
-    @ValidateIf((obj) => obj.password !== obj.password_confirmation)
+    @IsRequiredString()
+    @Match('password', { message: 'Passwords must match!' })
     password_confirmation: string
 }
