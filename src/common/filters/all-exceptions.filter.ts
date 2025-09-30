@@ -1,28 +1,41 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+import {
+    ExceptionFilter,
+    Catch,
+    ArgumentsHost,
+    HttpException,
+    HttpStatus,
+} from '@nestjs/common';
+import { Response, Request } from 'express';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
     catch(exception: unknown, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const res = ctx.getResponse<Response>();
+        const req = ctx.getRequest<Request>();
+
+        let status = HttpStatus.INTERNAL_SERVER_ERROR;
+        let message = 'Internal server error';
 
         if (exception instanceof HttpException) {
-            const status = exception.getStatus();
+            status = exception.getStatus();
+
             const resp = exception.getResponse();
-            if (typeof resp === 'object' && resp !== null && 'data' in resp) {
-                return res.status(status).json(resp);
+            if (typeof resp === 'string') {
+                message = resp;
+            } else if (typeof resp === 'object' && resp !== null) {
+                message = (resp as any).message ?? exception.message;
             }
-            const message = typeof resp === 'object' && resp !== null && 'message' in resp ? (resp as any).message : exception.message;
-            return res.status(status).json({ data: {}, message, type: 'error', code: status, showToast: true });
+        } else if (exception instanceof Error) {
+            message = exception.message;
         }
 
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-            data: {},
-            message: 'Internal server error',
-            type: 'error',
-            code: HttpStatus.INTERNAL_SERVER_ERROR,
-            showToast: false,
+        return res.status(status).json({
+            data: null,
+            message,
+            type: false, // keep consistent with your SuccessResponseInterceptor
+            code: status,
+            showToast: true,
         });
     }
 }

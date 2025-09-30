@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -6,6 +6,8 @@ import { UserModule } from './modules/user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CustomMailerModule } from './modules/mailer/mailer.module';
+import { CategoryModule } from './modules/category/category.module';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 
 
 @Module({
@@ -14,9 +16,13 @@ import { CustomMailerModule } from './modules/mailer/mailer.module';
     useFactory: (configService: ConfigService) => ({
       uri: configService.get<string>('MONGODB_URI')
     })
-  }), CustomMailerModule],
+  }), CustomMailerModule, CategoryModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
 
