@@ -1,6 +1,7 @@
 import { FilterQuery, Model } from "mongoose";
 export interface IPaginate {
-    page: number,
+    page?: number,
+    limit?: number
 }
 
 export type finderOneArg<TDocument> = {
@@ -32,6 +33,23 @@ export abstract class AbstractRepository<TDocument> {
         if (populate) query = query.populate(populate)
         if (sort) query = query.sort(sort)
         if (projection) query = query.select(projection)
+        if (paginate?.page ) {
+            const { page } = paginate;
+            const limit = paginate.limit || 10;
+            const skip = (page - 1) * limit;
+            const totalSize = await query.model.countDocuments(query.getQuery());
+            const data = await query.skip(skip).limit(limit).exec();
+            return {
+                data,
+                pagination: {
+                    totalSize,
+                    totalPages: Math.ceil(totalSize / limit),
+                    pageNumber: page,
+                    pageSize: data.length,
+                },
+
+            }
+        }
         const data = await query.exec();
         return { data };
     }
@@ -65,6 +83,28 @@ export abstract class AbstractRepository<TDocument> {
         filter: FilterQuery<TDocument>,
     ): Promise<TDocument | null> {
         let query = this.model.findOneAndDelete(filter)
+        return query.exec();
+    }
+    async deleteMany(
+        filter: FilterQuery<TDocument>,
+    ): Promise<{ deletedCount: number; deletedDocs: any[] }> {
+        const docs = await this.model.find(filter); // Lean objects
+        const result = await this.model.deleteMany(filter);
+        return {
+            deletedCount: result.deletedCount ?? 0,
+            deletedDocs: docs,
+        };
+    }
+
+    async findOneAndUpdate({
+        filter,
+        update,
+        populate,
+        select
+    }: UpdateArgs<TDocument>): Promise<TDocument | null> {
+        let query = this.model.findOneAndUpdate(filter, update, { new: true, runValidators: true })
+        if (select) query = query.select(select)
+        if (populate) query = query.populate(populate)
         return query.exec();
     }
 

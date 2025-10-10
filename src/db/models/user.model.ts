@@ -22,7 +22,7 @@ export class User {
     role: Role
 }
 
-const userSchema = SchemaFactory.createForClass(User)
+export const userSchema = SchemaFactory.createForClass(User)
 
 userSchema.pre('save', function (next) {
     if (this.isModified("password")) {

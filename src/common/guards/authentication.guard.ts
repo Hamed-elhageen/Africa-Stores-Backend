@@ -43,7 +43,7 @@ export class AuthGuard implements CanActivate {
             req['token'] = tokenDoc;
         }
         catch (error) {
-            console.log(error);
+            // console.log(error);
             if (error.name === 'TokenExpiredError') {
                 throw new UnauthorizedException('Token expired');
             }
@@ -52,7 +52,6 @@ export class AuthGuard implements CanActivate {
             }
             throw new InternalServerErrorException();
         }
-
 
         return true;
     }

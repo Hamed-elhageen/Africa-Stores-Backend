@@ -19,7 +19,9 @@ export class SuccessResponseInterceptor<T> implements NestInterceptor<T, any> {
                     type: true,
                     code: 200,
                     showToast: true,
-                    stack: data?.stack
+                    stack: data?.stack,
+                    pagination: data?.pagination,
+                    time: new Date().toISOString(),
                 };
             }),
             // tap((data) => console.log(`after edit ${JSON.stringify(data)}`)),
