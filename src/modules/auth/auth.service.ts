@@ -41,12 +41,12 @@ export class AuthService {
         charset: 'numeric'
       })
       // send email 
-      await this._MailerService.sendMail({
-        from: this._ConfigService.get<string>('MAIL_USER'),
-        to: email,
-        subject: 'Account Activation welcome to Africa Store',
-        html: `<p>Your OTP code is <b>${newOtp}</b></p>`,
-      })
+      // await this._MailerService.sendMail({
+      //   from: this._ConfigService.get<string>('MAIL_USER'),
+      //   to: email,
+      //   subject: 'Account Activation welcome to Africa Store',
+      //   html: `<p>Your OTP code is <b>${newOtp}</b></p>`,
+      // })
       await this._OtpRepository.create({
         code: newOtp,
         handle: email
