@@ -40,13 +40,17 @@ export class AuthService {
         length: 4,
         charset: 'numeric'
       })
-      // send email 
-      // await this._MailerService.sendMail({
-      //   from: this._ConfigService.get<string>('MAIL_USER'),
-      //   to: email,
-      //   subject: 'Account Activation welcome to Africa Store',
-      //   html: `<p>Your OTP code is <b>${newOtp}</b></p>`,
-      // })
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Email send timeout')), 7000)
+      );
+      await Promise.race([
+        this._MailerService.sendMail({
+          to: email,
+          subject: 'Account Activation - Africa Store',
+          html: `<p>Your OTP code is <b>${otp}</b></p>`,
+        }),
+        timeoutPromise,
+      ]);
       await this._OtpRepository.create({
         code: newOtp,
         handle: email
@@ -92,20 +96,20 @@ export class AuthService {
   }
 
   async logout(token: tokenDocument) {
-    try{
+    try {
       // console.log(token)
       token.isValid = false;
       const res = await token.save();
       return {
-        data:{},
+        data: {},
         message: "User logged out successfully",
       }
 
     }
-    catch(error){
+    catch (error) {
       console.log(error)
       throw new InternalServerErrorException("Something went wrong")
-      
+
     }
 
   }
