@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CustomMailerModule } from './modules/mailer/mailer.module';
 import { CategoryModule } from './modules/category/category.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { ProductModule } from './modules/product/product.module';
 
 
 @Module({
@@ -16,7 +17,7 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
     useFactory: (configService: ConfigService) => ({
       uri: configService.get<string>('MONGODB_URI')
     })
-  }), CustomMailerModule, CategoryModule],
+  }), CustomMailerModule, CategoryModule, ProductModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -11,5 +11,6 @@ import { CloudinaryProvider } from 'src/common/services/fileupload/cloudinary.pr
   imports: [CategoryModel],
   controllers: [CategoryController],
   providers: [CategoryService, CategoryRepository, FileUploadService, ConfigService, CloudinaryProvider],
+  exports: [CategoryService, CategoryRepository]
 })
 export class CategoryModule { }

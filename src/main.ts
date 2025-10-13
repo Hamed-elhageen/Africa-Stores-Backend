@@ -15,6 +15,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
+    transform: true,
+    transformOptions: { enableImplicitConversion: true },
     exceptionFactory: (errors) => {
       const payload = mapValidationErrors(errors);
       return new ValidationException(payload);

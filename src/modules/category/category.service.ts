@@ -5,7 +5,7 @@ import { isValidObjectId, Types } from 'mongoose';
 import { CategoryRepository } from 'src/db/repos/category.repository';
 import { FileUploadService } from 'src/common/services/fileupload/fileupload.service';
 import { ConfigService } from '@nestjs/config';
-import { nanoid } from 'nanoid'
+import { v4 as uuid } from 'uuid';
 import { PaginationDto } from './dto/pagnition.dto';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class CategoryService {
       throw new BadRequestException("Category image is required");
     }
     const rootFolder = this._ConfigService.get<string>('CLOUD_ROOT_FOLDER')!;
-    const cloudFolder = data.name.toLowerCase().replace(/\s+/g, '-') + '-' + nanoid(4);
+    const cloudFolder = data.name.toLowerCase().replace(/\s+/g, '-') + '-' + uuid().split('-')[0];
     const results = await this._FileUpload.saveFileToCloud(
       [file],
       { folder: `${rootFolder}/categories/${cloudFolder}`, }
