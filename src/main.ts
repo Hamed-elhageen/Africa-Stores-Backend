@@ -12,6 +12,7 @@ import { ErrorHandlerInterceptor } from './common/interceptors/error-handler.int
 async function bootstrap() {
   // const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
