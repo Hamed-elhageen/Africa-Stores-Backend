@@ -27,13 +27,12 @@ export class AuthService {
     private readonly _TokenRepository: TokenRepository
   ) { }
   async register(data: CreateUserDto) {
-    const { email, password } = data;
+    const { email } = data;
     try {
       const userExist = await this._UserService.userExistByEmail(email)
       if (userExist) {
         throw new BadRequestException("Email already exists")
       }
-      const user = await this._UserService.create({ ...data });
       const otp = await this._OtpRepository.findOne({ filter: { email } })
       if (otp) await otp.deleteOne();
       const newOtp = randomstring.generate({
@@ -51,6 +50,7 @@ export class AuthService {
         }),
         timeoutPromise,
       ]);
+      const user = await this._UserService.create({ ...data });
       await this._OtpRepository.create({
         code: newOtp,
         handle: email
@@ -61,7 +61,8 @@ export class AuthService {
       };
     }
     catch (error) {
-      throw new InternalServerErrorException(error)
+      console.log(error);
+      throw new InternalServerErrorException(error.message)
     }
   }
 
