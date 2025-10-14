@@ -16,6 +16,7 @@ import { ResendOtpDto } from './dto/resendOtp.dto';
 import { TokenRepository } from 'src/db/repos/token.repository';
 import { TokenType } from 'src/db/enums/token.enum';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { ResendMailService } from '../mailer/resend-mail.service';
 @Injectable()
 export class AuthService {
   constructor(
@@ -39,17 +40,14 @@ export class AuthService {
         length: 4,
         charset: 'numeric'
       })
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Email send timeout')), 7000)
-      );
-      await Promise.race([
-        this._MailerService.sendMail({
-          to: email,
-          subject: 'Account Activation - Africa Store',
-          html: `<p>Your OTP code is <b>${otp}</b></p>`,
-        }),
-        timeoutPromise,
-      ]);
+      console.log(newOtp);
+      const result = await this._MailerService.sendMail({
+        to: email,
+        subject: 'Account Activation - Africa Store',
+        html: `<p>Your OTP code is <b>${newOtp}</b></p>`,
+      });
+      // console.log(result);
+      if (!result) throw new InternalServerErrorException("Failed to send verification email");
       const user = await this._UserService.create({ ...data });
       await this._OtpRepository.create({
         code: newOtp,
@@ -128,11 +126,10 @@ export class AuthService {
       })
       // send email 
       await this._MailerService.sendMail({
-        from: this._ConfigService.get<string>('MAIL_USER'),
         to: handle,
-        subject: 'Account Activation welcome to Africa Store',
-        text: newOtp,
-      })
+        subject: 'Account Activation - Africa Store',
+        html: `<p>Your OTP code is <b>${newOtp}</b></p>`,
+      });
       await this._OtpRepository.create({
         code: newOtp,
         handle
@@ -183,11 +180,10 @@ export class AuthService {
       handle
     })
     await this._MailerService.sendMail({
-      from: this._ConfigService.get<string>('MAIL_USER'),
       to: handle,
       subject: 'Account Activation - Africa Store',
       html: `<p>Your OTP code is <b>${newOtp}</b></p>`,
-    })
+    });
 
     return {
       success: true,
@@ -215,10 +211,9 @@ export class AuthService {
       })
       this._MailerService.sendMail({
         to: handle,
-        from: this._ConfigService.get<string>('MAIL_USER'),
-        subject: 'Welcome to Africa Store , Password Reset',
+        subject: 'forget Password - Africa Store',
         html: `<p>Your OTP code is <b>${newOtp}</b></p>`,
-      })
+      });
       await this._OtpRepository.create({
         code: newOtp,
         handle

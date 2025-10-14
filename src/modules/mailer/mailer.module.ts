@@ -22,8 +22,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           connectionTimeout: 5000,
           greetingTimeout: 5000,
           socketTimeout: 5000,
+          pool: true, // reuse connection for faster sends
+          maxConnections: 3,
+          maxMessages: 10,
           tls: {
             rejectUnauthorized: false, // keep false if using Gmail App Password
+            servername: 'smtp.gmail.com',
           },
         },
         defaults: {
@@ -41,4 +45,4 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
   exports: [MailerModule],
 })
-export class CustomMailerModule {}
+export class CustomMailerModule { }

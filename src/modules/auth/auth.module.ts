@@ -10,16 +10,17 @@ import { tokenModel } from 'src/db/models/token.model';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from 'src/common/guards/authentication.guard';
 import { AuthorizationGuard } from 'src/common/guards/authorization.guard';
+import { ResendMailService } from '../mailer/resend-mail.service';
 
 @Module({
   imports: [UserModule, OtpModel, tokenModel],
   controllers: [AuthController],
-  providers: [AuthService, JwtService, OtpRepository, TokenRepository, {
+  providers: [AuthService, JwtService, OtpRepository, TokenRepository, ResendMailService, {
     provide: APP_GUARD,  // global 
     useClass: AuthGuard
-  },{
-    provide: APP_GUARD,  // global 
-    useClass: AuthorizationGuard
-  }],
+  }, {
+      provide: APP_GUARD,  // global 
+      useClass: AuthorizationGuard
+    }],
 })
 export class AuthModule { }
