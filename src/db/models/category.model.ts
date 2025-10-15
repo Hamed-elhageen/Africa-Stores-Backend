@@ -1,4 +1,4 @@
-import { MongooseModule, Prop, raw, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { MongooseModule, Prop, raw, Schema, SchemaFactory, Virtual } from "@nestjs/mongoose";
 import { HydratedDocument, HydrateOptions, ObjectId, Types } from "mongoose";
 import { UserModelName } from "./user.model";
 import type { Image } from "src/common/types/image.type";
@@ -6,8 +6,13 @@ import slugify from "slugify";
 import { FileUploadService } from "src/common/services/fileupload/fileupload.service";
 import { ConfigService } from "@nestjs/config";
 import { FileUploadModule } from "src/common/services/fileupload/fileupload.module";
+import { productModelName } from "./product.model";
 
-@Schema({ timestamps: true })
+@Schema({
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+})
 export class Category {
     @Prop({
         required: true, type: String, unique: true, index: {
@@ -28,6 +33,13 @@ export class Category {
 
 }
 export const CategorySchema = SchemaFactory.createForClass(Category)
+
+CategorySchema.virtual('productsCount', {
+    ref: 'Product',
+    localField: '_id',
+    foreignField: 'category',
+    count: true
+})
 
 export const CategoryModelName = Category.name;
 

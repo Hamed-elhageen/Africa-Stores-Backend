@@ -33,25 +33,21 @@ export abstract class AbstractRepository<TDocument> {
         if (populate) query = query.populate(populate)
         if (sort) query = query.sort(sort)
         if (projection) query = query.select(projection)
-        if (paginate?.page ) {
-            const { page } = paginate;
-            const limit = paginate.limit || 10;
-            const skip = (page - 1) * limit;
-            const totalSize = await query.model.countDocuments(query.getQuery());
-            const data = await query.skip(skip).limit(limit).exec();
-            return {
-                data,
-                pagination: {
-                    totalSize,
-                    totalPages: Math.ceil(totalSize / limit),
-                    pageNumber: page,
-                    pageSize: data.length,
-                },
+        const page = paginate?.page ? paginate.page : 1;
+        const limit = paginate?.limit || 10;
+        const skip = (page - 1) * limit;
+        const totalSize = await query.model.countDocuments(query.getQuery());
+        const data = await query.skip(skip).limit(limit).exec();
+        return {
+            data,
+            pagination: {
+                totalSize,
+                totalPages: Math.ceil(totalSize / limit),
+                pageNumber: page,
+                pageSize: data.length,
+            },
 
-            }
         }
-        const data = await query.exec();
-        return { data };
     }
     async findOne({ filter = {}, populate, select, projection }: finderOneArg<TDocument>): Promise<TDocument | null> {
         let query = this.model.findOne(filter)

@@ -1,3 +1,4 @@
+import { populate } from 'dotenv';
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -50,8 +51,9 @@ export class CategoryService {
     const categories = await this._CategoryRepository.findAll({
       sort: { createdAt: -1 }, populate: [
         { path: 'createdBy', select: '_id name email' },
+        { path: 'productsCount' }
       ],
-      paginate: pagination,
+
     },);
     if (!categories.data.length) {
       throw new NotFoundException('No categories found');
@@ -63,7 +65,7 @@ export class CategoryService {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid category ID');
     }
-    const category = await this._CategoryRepository.findOne({ filter: { _id: id } });
+    const category = await this._CategoryRepository.findOne({ filter: { _id: id }, populate: [{ path: 'createdBy', select: '_id name email' }, { path: 'productsCount' }] });
     if (!category) {
       throw new NotFoundException('Category not found');
     }

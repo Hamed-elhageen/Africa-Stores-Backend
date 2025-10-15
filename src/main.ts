@@ -8,10 +8,12 @@ import { mapValidationErrors } from './common/utils/validation.mapper';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { SuccessResponseInterceptor } from './common/interceptors/success-response.interceptor';
 import { ErrorHandlerInterceptor } from './common/interceptors/error-handler.interceptor';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   // const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set("query parser", "extended");
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

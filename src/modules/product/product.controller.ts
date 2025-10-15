@@ -12,6 +12,7 @@ import { ObjectIdValidationPipe } from 'src/common/pipes/objectid-validation.pip
 import { RemoveImageDto } from './dto/remove-image.dto';
 import { Public } from 'src/common/decorators/auth/public.decorator';
 import { PaginationDto } from '../category/dto/pagnition.dto';
+import { FindProductsDto } from './dto/find-product.dto';
 
 @Controller('products')
 export class ProductController {
@@ -61,18 +62,22 @@ export class ProductController {
 
   @Get()
   @Public()
-  async findAll(@Query() query: any, @Query() pagination: PaginationDto) {
-    return this.productService.findAll(query, pagination);
+  async findAll(@Query() query: FindProductsDto) {
+    return this.productService.findAll(query);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  async findOne(@Param('id', ObjectIdValidationPipe) id: Types.ObjectId) {
+    return this.productService.findOne(id);
   }
 
   @Roles(Role.admin)
   @Delete(':id')
   async remove(@Param('id', ObjectIdValidationPipe) productId: Types.ObjectId, @CurrentUser('_id') userId: Types.ObjectId) {
     return this.productService.remove(productId, userId);
+  }
+  @Roles(Role.admin)
+  async removeAll() {
+    return this.productService.removeAll();
   }
 }

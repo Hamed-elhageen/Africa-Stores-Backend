@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ConsoleLogger, Injectable, NotFoundException, Query } from '@nestjs/common';
+import { BadRequestException, ConflictException, ConsoleLogger, Injectable, NotFoundException, Query, Type } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Types } from 'mongoose';
@@ -12,6 +12,8 @@ import { RemoveImageDto } from './dto/remove-image.dto';
 import slugify from 'slugify';
 import { ProductController } from './product.controller';
 import { PaginationDto } from '../category/dto/pagnition.dto';
+import { FindProductsDto } from './dto/find-product.dto';
+import { populate } from 'dotenv';
 
 @Injectable()
 export class ProductService {
@@ -114,26 +116,60 @@ export class ProductService {
     return { data: product, message: 'Image added successfully' };
   }
 
-  async findAll(query: any, pagination: PaginationDto) {
-    console.log(query)
+  async findAll(query: FindProductsDto) {
+    // console.log(query)
     const products = await this._ProductRepository.findAll({
-      filter: { ...query }, populate: [{ path: 'createdBy', select: '_id name email' },
+      filter: {
+        ...(query.category && { category: new Types.ObjectId(query.category) }),
+        ...(query.k && {
+          $or: [{ name: { $regex: query.k, $options: 'i' } }, { description: { $regex: query.k, $options: 'i' } }]
+        }),
+        ...(query.price && {
+          finalPrice: {
+            ...(query.price.min !== undefined && { $gte: query.price.min }),
+            ...(query.price.max !== undefined && { $lte: query.price.max }),
+          }
+        }),
+        ...(query.club && { club: query.club })
+      },
+      sort: {
+        ...(query.sort?.by && { [query.sort.by]: query.sort.dir ? query.sort.dir : 1 }),
+      },
+      paginate: {
+        page: query.pagination?.page,
+        limit: query.pagination?.limit
+      },
+      populate: [{ path: 'createdBy', select: '_id name email' },
       { path: 'category', select: '_id name slug' }],
-      paginate: pagination
-    });
+    },
+
+    );
     return { data: products.data, pagination: products.pagination, message: 'Products fetched successfully' };
 
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: Types.ObjectId) {
+    const product = await this._ProductRepository.findOne({ filter: { _id: id }, populate: [{ path: 'createdBy', select: '_id name email' }, { path: 'category', select: '_id name ' }] });
+    if (!product) throw new NotFoundException('Product not found');
+    return { data: product, message: 'Product fetched successfully' };
   }
-
 
   async remove(productId: Types.ObjectId, userId: Types.ObjectId) {
     const product = await this._ProductRepository.findOne({ filter: { _id: productId } });
-    if (!product) throw new NotFoundException('Product not found');
+    if (!product) throw new NotFoundException('Product not found or already deleted');
     await product.deleteOne();
     return { data: product, message: 'Product deleted successfully' };
+  }
+
+  async removeAll() {
+    const { deletedCount, deletedDocs } = await this._ProductRepository.deleteMany({});
+    if (deletedCount === 0) {
+      throw new NotFoundException('No products found');
+    }
+    const rootFolder = this._ConfigService.get<string>('CLOUD_ROOT_FOLDER')!;
+    for (const doc of deletedDocs) {
+      await this._fileUpload.deleteFolder(`${rootFolder}/products/${doc.cloudFolder}`);
+    }
+    return { data: {}, message: 'Products deleted successfully' };
   }
 }
