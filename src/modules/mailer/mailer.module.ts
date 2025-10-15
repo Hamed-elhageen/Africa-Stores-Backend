@@ -11,8 +11,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         transport: {
-          host: 'smtp.gmail.com',
-          port: 587, // use 465 if using SSL
+          host: config.get('MAIL_HOST'),
+          port: config.get<number>('MAIL_PORT'),
           secure: false, // true for port 465
           auth: {
             user: config.get<string>('MAIL_USER'),
@@ -22,12 +22,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           connectionTimeout: 5000,
           greetingTimeout: 5000,
           socketTimeout: 5000,
-          pool: true, // reuse connection for faster sends
+          // pool: true, // reuse connection for faster sends
           maxConnections: 3,
           maxMessages: 10,
           tls: {
             rejectUnauthorized: false, // keep false if using Gmail App Password
-            servername: 'smtp.gmail.com',
+            // servername: 'smtp.gmail.com',
           },
         },
         defaults: {
