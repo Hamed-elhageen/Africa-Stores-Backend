@@ -17,6 +17,7 @@ import { TokenRepository } from 'src/db/repos/token.repository';
 import { TokenType } from 'src/db/enums/token.enum';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { ResendMailService } from '../mailer/resend-mail.service';
+import { CartRepository } from 'src/db/repos/cart.repository';
 @Injectable()
 export class AuthService {
   constructor(
@@ -25,7 +26,8 @@ export class AuthService {
     private readonly _ConfigService: ConfigService,
     private readonly _JwtService: JwtService,
     private readonly _OtpRepository: OtpRepository,
-    private readonly _TokenRepository: TokenRepository
+    private readonly _TokenRepository: TokenRepository,
+    private readonly _CartRepository: CartRepository
   ) { }
   async register(data: CreateUserDto) {
     const { email } = data;
@@ -49,6 +51,7 @@ export class AuthService {
       // console.log(result);
       if (!result) throw new InternalServerErrorException("Failed to send verification email");
       const user = await this._UserService.create({ ...data });
+      const cart  = await this._CartRepository.create({ user: user._id })
       await this._OtpRepository.create({
         code: newOtp,
         handle: email
@@ -59,7 +62,7 @@ export class AuthService {
       };
     }
     catch (error) {
-      console.log(error);
+      // console.log(error);
       throw new InternalServerErrorException(error.message)
     }
   }

@@ -11,9 +11,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from 'src/common/guards/authentication.guard';
 import { AuthorizationGuard } from 'src/common/guards/authorization.guard';
 import { ResendMailService } from '../mailer/resend-mail.service';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
-  imports: [UserModule, OtpModel, tokenModel],
+  imports: [UserModule, OtpModel, tokenModel, CartModule],
   controllers: [AuthController],
   providers: [AuthService, JwtService, OtpRepository, TokenRepository, ResendMailService, {
     provide: APP_GUARD,  // global 

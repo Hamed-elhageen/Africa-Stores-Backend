@@ -11,5 +11,6 @@ import { FileUploadModule } from 'src/common/services/fileupload/fileupload.modu
   controllers: [ProductController],
   providers: [ProductService, ProductRepository, ConfigService],
   imports: [productModel, CategoryModule, FileUploadModule],
+  exports: [productModel, ProductRepository, ProductService]
 })
 export class ProductModule { }

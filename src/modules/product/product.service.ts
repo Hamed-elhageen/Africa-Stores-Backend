@@ -14,6 +14,7 @@ import { ProductController } from './product.controller';
 import { PaginationDto } from '../category/dto/pagnition.dto';
 import { FindProductsDto } from './dto/find-product.dto';
 import { populate } from 'dotenv';
+import { productDocument } from 'src/db/models/product.model';
 
 @Injectable()
 export class ProductService {
@@ -171,5 +172,9 @@ export class ProductService {
       await this._fileUpload.deleteFolder(`${rootFolder}/products/${doc.cloudFolder}`);
     }
     return { data: {}, message: 'Products deleted successfully' };
+  }
+
+  instock(product: productDocument, quantity: number) {
+    return product.stock >= quantity ? true : false
   }
 }
