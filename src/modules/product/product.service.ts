@@ -8,12 +8,8 @@ import { v4 as uuid } from 'uuid'
 import { FileUploadService } from 'src/common/services/fileupload/fileupload.service';
 import { ConfigService } from '@nestjs/config';
 import { Image } from 'src/common/types/image.type';
-import { RemoveImageDto } from './dto/remove-image.dto';
 import slugify from 'slugify';
-import { ProductController } from './product.controller';
-import { PaginationDto } from '../category/dto/pagnition.dto';
 import { FindProductsDto } from './dto/find-product.dto';
-import { populate } from 'dotenv';
 import { productDocument } from 'src/db/models/product.model';
 
 @Injectable()
@@ -176,5 +172,21 @@ export class ProductService {
 
   instock(product: productDocument, quantity: number) {
     return product.stock >= quantity ? true : false
+  }
+
+  async checkProductExists(productId: Types.ObjectId) {
+    const product = await this._ProductRepository.findOne({ filter: { _id: productId } });
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
+  }
+
+  async updateStock(productId: Types.ObjectId, quantity: number, increment: boolean) {
+    const product = await this._ProductRepository.update({
+      filter: { _id: productId },
+      update: { $inc: { stock: increment ? quantity : -quantity } }
+    });
+    //emit socket event 
+    return product;
+
   }
 }

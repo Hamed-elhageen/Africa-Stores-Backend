@@ -15,8 +15,7 @@ export class CartService {
   ) { }
   async addToCart(data: AddToCartDto, userId: Types.ObjectId) {
     const { productId, quantity } = data;
-    const product = await this._productRepository.findOne({ filter: { _id: productId } });
-    if (!product) throw new NotFoundException('Product not found');
+    const product = await this._productService.checkProductExists(productId);
     const instock = this._productService.instock(product, quantity);
     if (!instock) throw new BadRequestException('Product not in stock');
     // Check if user already has a cart

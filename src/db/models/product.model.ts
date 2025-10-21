@@ -7,6 +7,15 @@ import { FileUploadService } from "src/common/services/fileupload/fileupload.ser
 import { ConfigService } from "@nestjs/config";
 import { FileUploadModule } from "src/common/services/fileupload/fileupload.module";
 import { CategoryModelName } from "./category.model";
+export enum ProductSizes {
+    XS = "XS",
+    S = "S",
+    M = "M",
+    L = "L",
+    XL = "XL",
+    XXL = "XXL",
+    XXXL = "XXXL"
+}
 
 @Schema({ timestamps: true })
 export class Product {
@@ -75,6 +84,9 @@ export class Product {
     @Prop({ type: Number, min: 0, max: 5 })
     rating: number
 
+    @Prop({ type: [String], enum: Object.values(ProductSizes), required: true })
+    sizes: ProductSizes[]
+
 }
 export const productSchema = SchemaFactory.createForClass(Product)
 
@@ -94,13 +106,13 @@ export const productModel = MongooseModule.forFeatureAsync([{
             return next();
         })
         productSchema.post('deleteOne', { document: true, query: false }, async function (doc) {
-          await fileUploadService.deleteFolder(doc.cloudFolder);
+            await fileUploadService.deleteFolder(doc.cloudFolder);
         })
         return productSchema;
     },
     inject: [ConfigService, FileUploadService],
     imports: [FileUploadModule]
-}]) 
+}])
 
 export type productDocument = HydratedDocument<Product>
 
