@@ -34,10 +34,20 @@ export class ProductController {
   }
 
   @Patch(':id')
-  @Roles(Role.admin)
-  async update(@Param('id', ObjectIdValidationPipe) productId: Types.ObjectId, @CurrentUser('_id') userId: Types.ObjectId, @Body() updatedData: UpdateProductDto) {
-    return this.productService.update(productId, updatedData, userId);
-  }
+@Roles(Role.admin)
+@UseInterceptors(FileFieldsInterceptor([
+  { name: 'thumbnail', maxCount: 1 },
+  { name: 'images', maxCount: 5 },
+]))
+async update(
+  @Param('id', ObjectIdValidationPipe) productId: Types.ObjectId,
+  @UploadedFiles() files: Record<string, Express.Multer.File[]>,
+  @Body() updatedData: UpdateProductDto,
+  @CurrentUser('_id') userId: Types.ObjectId,
+) {
+  return this.productService.update(productId, updatedData, userId, files);
+}
+
 
   @Delete(':id/remove-image')
   @Roles(Role.admin)
