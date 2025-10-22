@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { ProductRepository } from 'src/db/repos/product.repository';
@@ -10,7 +10,7 @@ import { FileUploadModule } from 'src/common/services/fileupload/fileupload.modu
 @Module({
   controllers: [ProductController],
   providers: [ProductService, ProductRepository, ConfigService],
-  imports: [productModel, CategoryModule, FileUploadModule],
+  imports: [productModel, forwardRef(() => CategoryModule), FileUploadModule],
   exports: [productModel, ProductRepository, ProductService]
 })
 export class ProductModule { }

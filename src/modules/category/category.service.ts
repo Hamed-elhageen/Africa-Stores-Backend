@@ -8,13 +8,15 @@ import { FileUploadService } from 'src/common/services/fileupload/fileupload.ser
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
 import { PaginationDto } from './dto/pagnition.dto';
+import { ProductService } from '../product/product.service';
 
 @Injectable()
 export class CategoryService {
   constructor(
     private readonly _CategoryRepository: CategoryRepository,
     private readonly _FileUpload: FileUploadService,
-    private readonly _ConfigService: ConfigService
+    private readonly _ConfigService: ConfigService,
+    private readonly _ProductService: ProductService,
   ) { }
 
   async create(data: CreateCategoryDto, userId: Types.ObjectId, file: Express.Multer.File) {
@@ -103,6 +105,7 @@ export class CategoryService {
     if (!category) {
       throw new NotFoundException('Category not found');
     }
+    await this._ProductService.removeProductsByCategory(id);
     await category.deleteOne();
     return {
       data: {},

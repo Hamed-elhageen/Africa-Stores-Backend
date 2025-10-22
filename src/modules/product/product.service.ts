@@ -49,55 +49,55 @@ export class ProductService {
   }
 
   async update(
-  productId: Types.ObjectId,
-  updatedData: UpdateProductDto,
-  userId: Types.ObjectId,
-  files?: Record<string, Express.Multer.File[]>,
-) {
-  const product = await this._ProductRepository.findOne({ filter: { _id: productId } });
-  if (!product) throw new NotFoundException('Product not found');
+    productId: Types.ObjectId,
+    updatedData: UpdateProductDto,
+    userId: Types.ObjectId,
+    files?: Record<string, Express.Multer.File[]>,
+  ) {
+    const product = await this._ProductRepository.findOne({ filter: { _id: productId } });
+    if (!product) throw new NotFoundException('Product not found');
 
-  // Optional: regenerate slug if name changed
-  if (updatedData.name) {
-    updatedData.slug = slugify(updatedData.name);
-  }
-
-  // Handle thumbnail update
-  if (files?.thumbnail?.length) {
-    // Delete old thumbnail from cloud if needed
-    if (product.thumbnail?.public_id) {
-      await this._fileUpload.deleteFiles([product.thumbnail.public_id]);
+    // Optional: regenerate slug if name changed
+    if (updatedData.name) {
+      updatedData.slug = slugify(updatedData.name);
     }
 
-    // Upload new one
-    const [newThumbnail] = await this._fileUpload.saveFileToCloud(files.thumbnail, {
-      folder: product.cloudFolder,
+    // Handle thumbnail update
+    if (files?.thumbnail?.length) {
+      // Delete old thumbnail from cloud if needed
+      if (product.thumbnail?.public_id) {
+        await this._fileUpload.deleteFiles([product.thumbnail.public_id]);
+      }
+
+      // Upload new one
+      const [newThumbnail] = await this._fileUpload.saveFileToCloud(files.thumbnail, {
+        folder: product.cloudFolder,
+      });
+      updatedData.thumbnail = newThumbnail;
+    }
+
+    // Handle images update
+    if (files?.images?.length) {
+      // Optional: delete old images or append new ones
+      const newImages = await this._fileUpload.saveFileToCloud(files.images, {
+        folder: product.cloudFolder.replace('/thumbnail', '/images'),
+      });
+
+      // You can choose:
+      // 1️⃣ Replace all old images:
+      updatedData.images = newImages;
+
+      // 2️⃣ Or append to existing images:
+      // updatedData.images = [...(product.images || []), ...newImages];
+    }
+
+    const updated = await this._ProductRepository.update({
+      filter: { _id: productId },
+      update: { ...updatedData, updatedBy: userId },
     });
-    updatedData.thumbnail = newThumbnail;
+
+    return { data: updated, message: 'Product updated successfully' };
   }
-
-  // Handle images update
-  if (files?.images?.length) {
-    // Optional: delete old images or append new ones
-    const newImages = await this._fileUpload.saveFileToCloud(files.images, {
-      folder: product.cloudFolder.replace('/thumbnail', '/images'),
-    });
-
-    // You can choose:
-    // 1️⃣ Replace all old images:
-    updatedData.images = newImages;
-
-    // 2️⃣ Or append to existing images:
-    // updatedData.images = [...(product.images || []), ...newImages];
-  }
-
-  const updated = await this._ProductRepository.update({
-    filter: { _id: productId },
-    update: { ...updatedData, updatedBy: userId },
-  });
-
-  return { data: updated, message: 'Product updated successfully' };
-}
 
 
   async removeImage(productId: Types.ObjectId, userId: Types.ObjectId, secure_url: string) {
@@ -211,6 +211,18 @@ export class ProductService {
       await this._fileUpload.deleteFolder(`${rootFolder}/products/${doc.cloudFolder}`);
     }
     return { data: {}, message: 'Products deleted successfully' };
+  }
+
+  async removeProductsByCategory(categoryId: Types.ObjectId) {
+     const categoryObjectId = new Types.ObjectId(categoryId);
+
+    // Perform deletion
+    const result = await this._ProductRepository.deleteMany({ category: categoryObjectId });
+    // Check how many were deleted
+    if (!result.deletedCount || result.deletedCount === 0) {
+      return; // No products to delete
+    }
+    return;
   }
 
   instock(product: productDocument, quantity: number) {
