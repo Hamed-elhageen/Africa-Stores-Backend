@@ -214,7 +214,7 @@ export class ProductService {
   }
 
   async removeProductsByCategory(categoryId: Types.ObjectId) {
-     const categoryObjectId = new Types.ObjectId(categoryId);
+    const categoryObjectId = new Types.ObjectId(categoryId);
 
     // Perform deletion
     const result = await this._ProductRepository.deleteMany({ category: categoryObjectId });
