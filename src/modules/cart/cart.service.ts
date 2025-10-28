@@ -1,5 +1,5 @@
 import { ObjectId, Types } from 'mongoose';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Type } from '@nestjs/common';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { CartRepository } from 'src/db/repos/cart.repository';
@@ -139,6 +139,19 @@ export class CartService {
         itemsCount: transformedProducts.length,
       },
       message: 'Cart fetched successfully',
+    };
+  }
+
+  async removeFromCart(productId: Types.ObjectId, userId: Types.ObjectId) {
+    const cart = await this._cartRepository.findOne({ filter: { user: userId } });
+    if (!cart) throw new NotFoundException('Cart not found');
+    const productIndex = cart.products.findIndex((p) => p.productId.toString() === productId.toString());
+    if (productIndex === -1) throw new NotFoundException('Product not found in cart');
+    cart.products.splice(productIndex, 1);
+    await cart.save();
+    return {
+      data: cart,
+      message: 'Product removed from cart successfully',
     };
   }
 
