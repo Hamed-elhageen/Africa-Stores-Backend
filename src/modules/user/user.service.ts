@@ -5,10 +5,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginDto } from '../auth/dto/login.dto';
 import { compareHash } from 'src/common/security/hash.util';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { Types } from 'mongoose';
+import { ProductRepository } from 'src/db/repos/product.repository';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly _UserRepository: UserRepository) { }
+  constructor(private readonly _UserRepository: UserRepository,
+    private readonly _productRepository: ProductRepository
+  ) { }
   async create(data: CreateUserDto) {
     return this._UserRepository.create({ ...data });
   }
@@ -55,6 +59,42 @@ export class UserService {
       data: {},
       message: "Password updated successfully",
     };
+  }
+
+  async toggleFavorite(userId: Types.ObjectId, productId: Types.ObjectId) {
+    const user = await this._UserRepository.findOne({ filter: { _id: userId } });
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+    const product = await this._productRepository.findOne({ filter: { _id: productId } });
+    if (!product) {
+      throw new UnauthorizedException("Product not found");
+    }
+    const index = user.favorites.findIndex(
+      (id) => id.toString() === productId.toString(),
+    );
+    if (index > -1) {   // remove from favorites
+      user.favorites.splice(index, 1);
+      await user.save();
+      return { data: [], message: 'Removed from favorites' };
+    } else {
+      // ✅ Add to favorites
+      user.favorites.push(productId);
+      await user.save();
+      return { data: [], message: 'Added to favorites' };
+    }
+  }
+
+  async getFavorites(userId: Types.ObjectId) {
+    const user = await this._UserRepository.findOne({ filter: { _id: userId }, populate: 'favorites' });
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+    return {
+      data: user.favorites,
+      message: "Favorites fetched successfully",
+    }
+
   }
 
 
