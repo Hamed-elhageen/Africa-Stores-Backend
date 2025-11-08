@@ -13,6 +13,10 @@ export class MailController {
         @Body('subject') subject: string,
         @Body('html') html: string,
     ) {
-        return this.mailService.sendMail(to, subject, html);
+        return this.mailService.sendMail({
+            to,
+            subject,
+            html,
+        });
     }
 }

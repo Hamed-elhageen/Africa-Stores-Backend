@@ -18,11 +18,12 @@ import { TokenType } from 'src/db/enums/token.enum';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { ResendMailService } from '../mailer/resend-mail.service';
 import { CartRepository } from 'src/db/repos/cart.repository';
+import { MailService } from '../mail/mail.service';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly _UserService: UserService,
-    private readonly _MailerService: MailerService,
+    private readonly _MailerService: MailService,
     private readonly _ConfigService: ConfigService,
     private readonly _JwtService: JwtService,
     private readonly _OtpRepository: OtpRepository,
