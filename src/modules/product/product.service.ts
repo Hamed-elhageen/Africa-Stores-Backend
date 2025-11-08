@@ -11,13 +11,15 @@ import { Image } from 'src/common/types/image.type';
 import slugify from 'slugify';
 import { FindProductsDto } from './dto/find-product.dto';
 import { productDocument } from 'src/db/models/product.model';
+import { StockGateway } from '../socket/stock.gateway';
 
 @Injectable()
 export class ProductService {
   constructor(private readonly _ProductRepository: ProductRepository,
     private readonly _categoryRepository: CategoryRepository,
     private readonly _fileUpload: FileUploadService,
-    private readonly _ConfigService: ConfigService
+    private readonly _ConfigService: ConfigService,
+    private readonly _StockGateway: StockGateway
 
   ) { }
   async create(
@@ -241,7 +243,7 @@ export class ProductService {
       update: { $inc: { stock: increment ? quantity : -quantity } }
     });
     //emit socket event 
+    this._StockGateway.broadcastStockUpdate(product!._id, product!.stock);
     return product;
-
   }
 }
