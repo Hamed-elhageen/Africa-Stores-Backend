@@ -9,11 +9,13 @@ import { tokenModel } from 'src/db/models/token.model';
 import { FavoritesController } from '../product/favorites.controller';
 import { ProductRepository } from 'src/db/repos/product.repository';
 import { productModel } from 'src/db/models/product.model';
+import { CloudinaryProvider } from 'src/common/services/fileupload/cloudinary.provider';
+import { FileUploadService } from 'src/common/services/fileupload/fileupload.service';
 
 @Module({
   imports: [UserModel, tokenModel, productModel],
   controllers: [UserController, FavoritesController],
-  providers: [UserService, UserRepository, JwtService, TokenRepository, ProductRepository],
+  providers: [UserService, UserRepository, JwtService, TokenRepository, ProductRepository, CloudinaryProvider, FileUploadService],
   exports: [UserService, UserRepository]
 })
 export class UserModule { } 
