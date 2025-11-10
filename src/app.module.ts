@@ -13,6 +13,7 @@ import { ResendMailModule } from './modules/mailer/resend-mail.module';
 import { CartModule } from './modules/cart/cart.module';
 import { OrderModule } from './modules/order/order.module';
 import { MailModule } from './modules/mail/mail.module';
+import { HomeModule } from './modules/home/home.module';
 
 
 @Module({
@@ -21,7 +22,7 @@ import { MailModule } from './modules/mail/mail.module';
       useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI')
       })
-    }), CustomMailerModule, CategoryModule, ProductModule , ResendMailModule, CartModule, OrderModule,MailModule],
+    }), CustomMailerModule, CategoryModule, ProductModule , ResendMailModule, CartModule, OrderModule,MailModule, HomeModule],
   controllers: [AppController],
   providers: [AppService],
 })
