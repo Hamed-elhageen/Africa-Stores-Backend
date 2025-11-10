@@ -6,13 +6,16 @@ import { CartService } from '../cart/cart.service';
 import { ProductService } from '../product/product.service';
 import { OrderRepository } from 'src/db/repos/order.repository';
 import { PaymentMethod } from 'src/db/models/order.model';
+import { PaymentService } from 'src/common/services/payment/payment.service';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class OrderService {
   constructor(
     private readonly _cartService: CartService,
     private readonly _productService: ProductService,
-    private readonly _orderRepository: OrderRepository
+    private readonly _orderRepository: OrderRepository,
+    private readonly _paymentService: PaymentService
   ) {
   }
   async create(data: CreateOrderDto, user: UserDocument) {
@@ -25,12 +28,19 @@ export class OrderService {
     }
     // check products
     let totalPrice = 0;
+    let products: any = [];
     for (const product of cart.data.products) {
       const prod = await this._productService.checkProductExists(product.productId);
       if (!this._productService.instock(prod, product.quantity)) {
         throw new BadRequestException(`Product ${prod.name} is not in stock `);
       }
       totalPrice += prod.finalPrice * product.quantity;
+      products.push({
+        name: prod.name,
+        price: prod.finalPrice,
+        quantity: product.quantity,
+        image: prod.thumbnail.secure_url
+      });
     }
 
     // create order
@@ -47,9 +57,30 @@ export class OrderService {
       }
       return { data: order, message: 'Order created successfully and paid cash' };
     }
+    
     // payment process  >> update stock  // socekt 
+    const session = await this.payWithCard(order.id, products, user.email)
+    return { data: session.url, message: 'Order created successfully' };
+  }
 
-    return { data: order, message: 'Order created successfully' };
+  async payWithCard(orderId, products, userEmail:string,) {
+    const line_items = products.map((product) => ({
+      price_data:{
+        currency:"egp",
+        product_data:{
+          name:product.name,
+          images:[product.image]
+        },
+      
+        unit_amount:product.price *100
+      },
+      quantity:product.quantity
+    }))
+    return await this._paymentService.createCheckoutSession({
+      metadata: { orderId  },
+      customer_email: userEmail,
+      line_items
+    })
   }
 
   findAll() {

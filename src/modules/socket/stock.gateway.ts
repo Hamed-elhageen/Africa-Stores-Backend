@@ -41,10 +41,10 @@ export class StockGateway implements OnGatewayConnection, OnGatewayDisconnect {
             if (!user) {
                 throw new NotFoundException('user not found');
             }
-            // const tokenDoc = await this.TokenRepository.findOne({ filter: { user: payload.id, isValid: true , token: token } });
-            // if (!tokenDoc) {
-            //     throw new BadRequestException('Invalid token');
-            // }
+            const tokenDoc = await this.TokenRepository.findOne({ filter: { user: user._id, isValid: true, token: token } });
+            if (!tokenDoc) {
+                throw new BadRequestException('Invalid token');
+            }
             client.data.user = user._id
         } catch (error) {
             console.log(error.message);
@@ -73,5 +73,22 @@ export class StockGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     // private to specific socket 
+    @SubscribeMessage('private-message')
+    handlePrivateMessage(client: Socket, data: {
+        recevierdId: string,
+        message: string
+    }) {
+        console.log(`Received private message from user ${client.data.user}:`, data);
+        const sender = client.data.user
+        if (!sender) {
+            return client.emit("error", { message: "sender not found" })
+        }
+        const recevierdSocket = this.socketUsers.get(data.recevierdId)
+        if (!recevierdSocket) {
+            return client.emit("error", { message: "receiver not found" })
+        }
+        recevierdSocket.emit("private", { sender, message: data.message })
+
+    }
 
 }

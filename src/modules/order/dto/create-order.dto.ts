@@ -7,8 +7,8 @@ export class CreateOrderDto {
 
     @IsRequiredString()
     address: string;
-    
+
     @IsOptional()
     @IsEnum(PaymentMethod)
-    PaymentMethod: PaymentMethod;
+    paymentMethod: PaymentMethod;
 } 

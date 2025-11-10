@@ -5,10 +5,11 @@ import { CartModule } from '../cart/cart.module';
 import { ProductModule } from '../product/product.module';
 import { OrderRepository } from 'src/db/repos/order.repository';
 import { OrderModel } from 'src/db/models/order.model';
+import { PaymentModule } from 'src/common/services/payment/payment.module';
 
 @Module({
   controllers: [OrderController],
-  providers: [OrderService, OrderRepository],
-  imports: [CartModule, ProductModule, OrderModel],
+  providers: [OrderService, OrderRepository,],
+  imports: [CartModule, ProductModule, OrderModel, PaymentModule],
 })
 export class OrderModule { }
