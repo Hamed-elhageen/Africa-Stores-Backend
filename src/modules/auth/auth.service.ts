@@ -269,7 +269,16 @@ export class AuthService {
     }
   }
   async validateCode(data: VerifyUserDto) {
+    const { handle, code } = data;
+    const otp = await this._OtpRepository.findOne({ filter: { handle } })
+    if (!otp) throw new BadRequestException("expired Otp please resend")
+    if (!compareHash(code, otp.code)) throw new BadRequestException("Invalid Otp")
+    return {
+      success: true,
+      message: "Otp verified successfully",
+      code: 200,
+      showToast: true
+    }
   }
-
 
 }

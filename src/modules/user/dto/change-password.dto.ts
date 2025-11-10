@@ -5,8 +5,8 @@ import { Match } from 'src/common/decorators/validation/match.decorator';
 export class ChangePasswordDto {
     @IsRequiredString()
     old_password: string;
-    @IsRequiredString()
     @IsStrongPassword()
+    @IsRequiredString()
     new_password: string;
     @IsRequiredString()
     @Match('new_password', { message: 'Passwords must match!' })
