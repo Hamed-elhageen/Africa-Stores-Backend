@@ -1,9 +1,7 @@
 import { tokenDocument } from './../../db/models/token.model';
-import { hash } from './../../common/security/hash.util';
 import { BadRequestException, ConsoleLogger, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UserService } from '../user/user.service';
-import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -16,7 +14,6 @@ import { ResendOtpDto } from './dto/resendOtp.dto';
 import { TokenRepository } from 'src/db/repos/token.repository';
 import { TokenType } from 'src/db/enums/token.enum';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
-import { ResendMailService } from '../mailer/resend-mail.service';
 import { CartRepository } from 'src/db/repos/cart.repository';
 import { MailService } from '../mail/mail.service';
 @Injectable()
