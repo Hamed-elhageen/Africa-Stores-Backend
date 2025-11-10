@@ -1,5 +1,5 @@
 import { IsEmail } from 'class-validator';
-import { IsRequiredString } from 'src/common/decorators/validation/is-required-string.decorator.ts';
+import { IsRequiredString } from 'src/common/decorators/validation/is-required-string.decorator';
 import { IsStrongPassword } from 'src/common/decorators/validation/is-strong-password.decorator';
 import { Match } from 'src/common/decorators/validation/match.decorator';
 export class ResetPasswordDto {

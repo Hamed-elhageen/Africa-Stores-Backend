@@ -1,6 +1,6 @@
 import { IsNumber, Max, Min, IsOptional, IsInt, IsNotEmpty, IsNotEmptyObject, IsDefined, IsArray, ArrayNotEmpty, IsEnum } from "class-validator";
 import { Transform, Type } from "class-transformer";
-import { IsRequiredString } from "src/common/decorators/validation/is-required-string.decorator.ts";
+import { IsRequiredString } from "src/common/decorators/validation/is-required-string.decorator";
 import { ProductSizes } from "src/db/models/product.model";
 
 export class CreateProductDto {
