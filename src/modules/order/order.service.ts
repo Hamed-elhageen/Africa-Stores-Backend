@@ -85,7 +85,6 @@ export class OrderService {
       customer_email: userEmail,
       line_items,
       discounts: [{ coupon: id }]
-
     })
   }
 

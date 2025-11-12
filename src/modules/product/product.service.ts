@@ -164,7 +164,7 @@ export class ProductService {
       filter: {
         ...(query.category && { category: new Types.ObjectId(query.category) }),
         ...(query.k && {
-          $or: [{ name: { $regex: query.k, $options: 'i' } }, { description: { $regex: query.k, $options: 'i' } }]
+          $or: [{ name: { $regex: query.k, $options: 'i' } }]
         }),
         ...(query.price && {
           finalPrice: {
