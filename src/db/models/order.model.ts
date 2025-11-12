@@ -6,12 +6,9 @@ import slugify from "slugify";
 import { CategoryModelName } from "./category.model";
 import { CartModelName } from "./cart.model";
 export enum OrderStatus {
-    placed = 'placed',
-    shipped = 'shipped',
-    onWay = 'onWay',
-    delivered = 'delivered',
+    pending = 'pending',
     cancelled = 'cancelled',
-    refended = 'refended'
+    completed = 'completed',
 }
 export enum PaymentMethod {
     card = 'card',
@@ -24,6 +21,9 @@ export class Order {
 
     @Prop({ required: true, type: Types.ObjectId, ref: CartModelName })
     cart: Types.ObjectId;
+    
+    @Prop({required:true, type:String})
+    username:string 
 
     @Prop({ required: true, type: String })
     phone: string;
@@ -31,7 +31,7 @@ export class Order {
     @Prop({ required: true, type: String })
     address: string
 
-    @Prop({ required: true, type: String, enum: OrderStatus, default: OrderStatus.placed })
+    @Prop({ required: true, type: String, enum: OrderStatus, default: OrderStatus.pending })
     orderStatus: OrderStatus
 
     @Prop({ required: true, type: Number })

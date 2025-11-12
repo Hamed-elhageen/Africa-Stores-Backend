@@ -76,10 +76,16 @@ export class OrderService {
       },
       quantity:product.quantity
     }))
+    const {id} = await this._paymentService.createCoupon({
+      currency:"egp",
+      percent_off:10 // coupon model 
+    })
     return await this._paymentService.createCheckoutSession({
       metadata: { orderId  },
       customer_email: userEmail,
-      line_items
+      line_items,
+      discounts: [{ coupon: id }]
+
     })
   }
 

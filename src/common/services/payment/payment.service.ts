@@ -28,4 +28,11 @@ export class PaymentService {
         return session
     }
 
+    async createCoupon({currency , percent_off}:Stripe.CouponCreateParams) {
+      return this.stripe.coupons.create({
+            currency,
+            percent_off
+        })
+    }
+
 }

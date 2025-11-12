@@ -6,6 +6,9 @@ export class CreateOrderDto {
     phone: string;
 
     @IsRequiredString()
+    username:string
+
+    @IsRequiredString()
     address: string;
 
     @IsOptional()
