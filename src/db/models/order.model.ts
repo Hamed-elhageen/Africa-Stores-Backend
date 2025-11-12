@@ -5,6 +5,7 @@ import type { Image } from "src/common/types/image.type";
 import slugify from "slugify";
 import { CategoryModelName } from "./category.model";
 import { CartModelName } from "./cart.model";
+import { productModelName } from "./product.model";
 export enum OrderStatus {
     pending = 'pending',
     cancelled = 'cancelled',
@@ -21,9 +22,29 @@ export class Order {
 
     @Prop({ required: true, type: Types.ObjectId, ref: CartModelName })
     cart: Types.ObjectId;
-    
-    @Prop({required:true, type:String})
-    username:string 
+
+     @Prop({
+    type: [
+      {
+        productId: { type: Types.ObjectId, ref: productModelName, required: true },
+        name: { type: String, required: true },
+        price: { type: Number, required: true },
+        quantity: { type: Number, required: true },
+        image: { type: String },
+      },
+    ],
+    required: true,
+  })
+  products: {
+    productId: Types.ObjectId;
+    name: string;
+    price: number;
+    quantity: number;
+    image?: string;
+  }[];
+
+    @Prop({ required: true, type: String })
+    username: string
 
     @Prop({ required: true, type: String })
     phone: string;

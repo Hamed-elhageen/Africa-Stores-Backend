@@ -25,12 +25,7 @@ export class Cart {
 }
 export const CartSchema = SchemaFactory.createForClass(Cart)
 
-// CartSchema.virtual('productsCount', {
-//     ref: 'Product',
-//     localField: '_id',
-//     foreignField: 'Cart',
-//     count: true
-// })
+
 
 export const CartModelName = Cart.name;
 
@@ -38,25 +33,6 @@ export const CartModel = MongooseModule.forFeature([{
     name: CartModelName,
     schema: CartSchema
 }])
-// export const CartModel = MongooseModule.forFeatureAsync([{
-//     name: CartModelName,
-//     useFactory: (configService: ConfigService, fileUploadService: FileUploadService) => {
-//         // CartSchema.pre('save', function (next) {
-//         //     if (this.isModified("name")) {
-//         //         this.slug = slugify(this.name)
-//         //     }
-//         //     return next();
-//         // })
-//         // CartSchema.post('deleteOne', { document: true, query: false }, async function (doc) {
-//         //     const CartFolder = doc.cloudFolder;
-//         //     const rootFolder = configService.get<string>('CLOUD_ROOT_FOLDER')!;
-//         //     await fileUploadService.deleteFolder(`${rootFolder}/categories/${CartFolder}`);
-//         // })
-//         // return CartSchema;
-//     },
-//     injrect: [ConfigService, FileUploadService],
-//     impots: [FileUploadModule]
-// }])
 
 export type CartDocument = HydratedDocument<Cart>
 
