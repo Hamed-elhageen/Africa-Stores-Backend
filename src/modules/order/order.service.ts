@@ -40,6 +40,8 @@ export class OrderService {
         name: prod.name,
         price: prod.finalPrice,
         quantity: product.quantity,
+        discount: prod.discount,
+        subtotal:product.subtotal,
         image: prod.thumbnail.secure_url
       });
     }

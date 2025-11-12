@@ -1,11 +1,15 @@
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument } from 'mongoose';
+import { Document, HydratedDocument, Types } from 'mongoose';
 import type { Image } from 'src/common/types/image.type';
+import { productModelName } from './product.model';
 
 @Schema({ timestamps: true })
 export class Home extends Document {
     @Prop({ required: true })
     title: string;
+
+    @Prop({ required: true, type: Types.ObjectId, ref: productModelName })
+    product: Types.ObjectId
 
     @Prop({ required: true })
     club: string;
@@ -24,7 +28,8 @@ export class Home extends Document {
             secure_url: 'https://res.cloudinary.com/demo/image/upload/v123456789/default.png',
         },
     })
-    image:Image;
+    image: Image;
+
 }
 
 export const HomeSchema = SchemaFactory.createForClass(Home);

@@ -40,7 +40,7 @@ export class HomeService {
 
 
   async findAll() {
-    return this.homeRepository.findAll({});
+    return this.homeRepository.findAll({ });
   }
 
   async findOne(id: Types.ObjectId) {

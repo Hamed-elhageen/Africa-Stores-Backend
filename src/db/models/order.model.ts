@@ -31,6 +31,8 @@ export class Order {
         price: { type: Number, required: true },
         quantity: { type: Number, required: true },
         image: { type: String },
+        subtotal: { type: Number, required: true },
+        discount: { type: Number, required: true },
       },
     ],
     required: true,

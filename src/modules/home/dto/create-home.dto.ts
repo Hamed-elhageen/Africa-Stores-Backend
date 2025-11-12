@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 import type { Image } from 'src/common/types/image.type';
 
 export class CreateHomeDto {
@@ -17,4 +18,9 @@ export class CreateHomeDto {
     @IsNotEmpty()
     @IsString()
     season: string;
+
+    @IsNotEmpty()
+    @IsMongoId()
+    product: Types.ObjectId;
+    
 }
