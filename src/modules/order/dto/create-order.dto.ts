@@ -6,7 +6,7 @@ export class CreateOrderDto {
     phone: string;
 
     @IsRequiredString()
-    username:string
+    username: string
 
     @IsRequiredString()
     address: string;
@@ -14,4 +14,8 @@ export class CreateOrderDto {
     @IsOptional()
     @IsEnum(PaymentMethod)
     paymentMethod: PaymentMethod;
+    
+    @IsOptional()
+    @IsString()
+    couponCode?: string;
 } 

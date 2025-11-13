@@ -8,6 +8,7 @@ import { OrderRepository } from 'src/db/repos/order.repository';
 import { OrderStatus, PaymentMethod } from 'src/db/models/order.model';
 import { PaymentService } from 'src/common/services/payment/payment.service';
 import { Types } from 'mongoose';
+import { CouponService } from '../coupon/coupon.service';
 
 @Injectable()
 export class OrderService {
@@ -15,7 +16,8 @@ export class OrderService {
     private readonly _cartService: CartService,
     private readonly _productService: ProductService,
     private readonly _orderRepository: OrderRepository,
-    private readonly _paymentService: PaymentService
+    private readonly _paymentService: PaymentService,
+    private readonly _couponService: CouponService
   ) {
   }
   async create(data: CreateOrderDto, user: UserDocument) {
@@ -41,7 +43,7 @@ export class OrderService {
         price: prod.finalPrice,
         quantity: product.quantity,
         discount: prod.discount,
-        subtotal:product.subtotal,
+        subtotal: product.subtotal,
         image: prod.thumbnail.secure_url
       });
     }
