@@ -17,7 +17,7 @@ export class CouponController {
   async create(@Body() dto: CreateCouponDto) {
     return await this._couponService.create(dto);
   }
-
+  @Roles(Role.user)
   @Post('apply')
   async applyCoupon(@Body() dto: ApplyCouponDto) {
     return await this._couponService.applyCoupon(dto);
@@ -42,6 +42,5 @@ export class CouponController {
   async remove(@Param('id', ObjectIdValidationPipe) id: Types.ObjectId) {
     return await this._couponService.remove(id);
   }
-
 
 }
