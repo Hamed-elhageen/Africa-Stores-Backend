@@ -71,7 +71,7 @@ export class CouponService {
         code: coupon.code,
         type: coupon.type,
         value: coupon.value,
-        discout,
+        discount: discout,
         finalTotal
       }, message: 'Coupon applied successfully'
     };

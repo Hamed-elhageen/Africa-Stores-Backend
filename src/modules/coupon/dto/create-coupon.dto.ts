@@ -19,6 +19,7 @@ export class CreateCouponDto {
     @Matches(/^\d{4}-\d{2}-\d{2}$/, {
         message: 'expiryDate must be in format YYYY-MM-DD',
     })
+    @IsOptional()
     expiryDate: string;
 
     @IsOptional()

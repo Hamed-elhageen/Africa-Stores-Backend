@@ -22,8 +22,6 @@ export class OrderService {
   }
   async create(data: CreateOrderDto, user: UserDocument) {
     const userId = user._id;
-    // user id 
-    // check cart 
     const cart = await this._cartService.getCart(userId);
     if (!cart || !cart.data.products.length) {
       throw new NotFoundException('empty cart ');
@@ -48,13 +46,29 @@ export class OrderService {
       });
     }
 
+    // 🧾 Apply coupon if provided
+    let discount = 0;
+    let finalTotal = totalPrice;
+    let appliedCoupon: any;
+
+    if (data.couponCode) {
+      const couponResult = await this._couponService.applyCoupon({
+        code: data.couponCode,
+        total: totalPrice
+      });
+      discount = couponResult.data.discount;
+      finalTotal = couponResult.data.finalTotal;
+      appliedCoupon = couponResult.data;
+    }
+
     // create order
     const order = await this._orderRepository.create({
       ...data,
       cart: cart.data._id,
       user: userId,
       products,
-      price: totalPrice
+      price: totalPrice,
+      coupon: appliedCoupon? appliedCoupon.code : null,
     })
     if (order.paymentMethod == PaymentMethod.cash) {
       const products = cart.data.products;
@@ -65,11 +79,11 @@ export class OrderService {
       return { data: order, message: 'Order created successfully and paid cash' };
     }
 
-    const session = await this.payWithCard(order.id, products, user.email)
+    const session = await this.payWithCard(order.id, products, user.email,appliedCoupon)
     return { data: session.url, message: 'Order created successfully' };
   }
 
-  async payWithCard(orderId, products, userEmail: string,) {
+  async payWithCard(orderId, products, userEmail: string, appliedCoupon?: any) {
     const line_items = products.map((product) => ({
       price_data: {
         currency: "egp",
@@ -84,7 +98,7 @@ export class OrderService {
     }))
     const { id } = await this._paymentService.createCoupon({
       currency: "egp",
-      percent_off: 10 // coupon model 
+      percent_off: appliedCoupon.type === 'PERCENTAGE' ? appliedCoupon.value : undefined,
     })
     return await this._paymentService.createCheckoutSession({
       metadata: { orderId },
