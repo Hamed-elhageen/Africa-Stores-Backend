@@ -68,7 +68,7 @@ export class OrderService {
       user: userId,
       products,
       price: totalPrice,
-      coupon: appliedCoupon? appliedCoupon.code : null,
+      coupon: appliedCoupon ? appliedCoupon.code : null,
     })
     if (order.paymentMethod == PaymentMethod.cash) {
       const products = cart.data.products;
@@ -79,7 +79,7 @@ export class OrderService {
       return { data: order, message: 'Order created successfully and paid cash' };
     }
 
-    const session = await this.payWithCard(order.id, products, user.email,appliedCoupon)
+    const session = await this.payWithCard(order.id, products, user.email, appliedCoupon)
     return { data: session.url, message: 'Order created successfully' };
   }
 
@@ -98,7 +98,7 @@ export class OrderService {
     }))
     const { id } = await this._paymentService.createCoupon({
       currency: "egp",
-      percent_off: appliedCoupon.type === 'PERCENTAGE' ? appliedCoupon.value : undefined,
+      percent_off: appliedCoupon.value
     })
     return await this._paymentService.createCheckoutSession({
       metadata: { orderId },
