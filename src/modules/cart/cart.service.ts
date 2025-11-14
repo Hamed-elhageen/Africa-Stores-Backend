@@ -86,7 +86,7 @@ export class CartService {
     if (!instock) throw new BadRequestException('Product not in stock');
 
     const cart = await this._cartRepository.update({
-      filter: { user: userId, "products.productId": productId },
+      filter: { user: userId, "products._id": productId },
       update: { "products.$.quantity": quantity, "products.$.price": product.finalPrice }
     });
 
@@ -157,7 +157,7 @@ export class CartService {
   async removeFromCart(productId: Types.ObjectId, userId: Types.ObjectId) {
     const cart = await this._cartRepository.findOne({ filter: { user: userId } });
     if (!cart) throw new NotFoundException('Cart not found');
-    const productIndex = cart.products.findIndex((p) => p.productId.toString() === productId.toString());
+    const productIndex = cart.products.findIndex((p) => p._id?.toString() === productId.toString());
     if (productIndex === -1) throw new NotFoundException('Product not found in cart');
     cart.products.splice(productIndex, 1);
     await cart.save();

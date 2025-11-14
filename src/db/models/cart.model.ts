@@ -21,6 +21,7 @@ export class Cart {
         quantity: number,
         price: number,
         productSize: string
+        _id?: Types.ObjectId
     }[];
 
 }
