@@ -15,11 +15,12 @@ import { productModelName } from "./product.model";
 export class Cart {
     @Prop({ required: true, type: Types.ObjectId, ref: UserModelName })
     user: Types.ObjectId
-    @Prop([{ productId: { type: Types.ObjectId, ref: productModelName, required: true }, quantity: { type: Number, default: 1 }, price: { type: Number } }])
+    @Prop([{ productId: { type: Types.ObjectId, ref: productModelName, required: true }, quantity: { type: Number, default: 1 }, price: { type: Number }, productSize: { type: String } }])
     products: {
         productId: Types.ObjectId,
         quantity: number,
-        price: number
+        price: number,
+        productSize: string
     }[];
 
 }

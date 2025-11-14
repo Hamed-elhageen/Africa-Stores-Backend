@@ -39,6 +39,7 @@ export class CartService {
           productId,
           quantity,
           price: product.finalPrice,
+          productSize: data.productSize
         });
       }
       await existingCart.save();
@@ -57,6 +58,7 @@ export class CartService {
           productId,
           quantity,
           price: product.price,
+          productSize: data.productSize
         },
       ],
     });
@@ -125,6 +127,7 @@ export class CartService {
         thumbnail: product?.thumbnail?.secure_url,
         quantity: item.quantity,
         price: item.price,
+        productSize: item.productSize,
         subtotal: item.price * item.quantity
       };
     });
