@@ -13,61 +13,70 @@ export class CartService {
     private readonly _productRepository: ProductRepository,
     private readonly _productService: ProductService
   ) { }
-  async addToCart(data: AddToCartDto, userId: Types.ObjectId) {
-    const { productId, quantity } = data;
-    const product = await this._productService.checkProductExists(productId);
-    const instock = this._productService.instock(product, quantity);
-    if (!instock) throw new BadRequestException('Product not in stock');
-    // Check if user already has a cart
-    const existingCart = await this._cartRepository.findOne({ filter: { user: userId } });
-    if (existingCart) {
-      // Check if product already exists in cart
-      const productIndex = existingCart.products.findIndex(
-        (p) => p.productId.toString() === productId.toString()
-      );
-      if (productIndex !== -1) {
-        // Product exists → increment quantity
-        const newQuantity = existingCart.products[productIndex].quantity + quantity;
-        // Check if still in stock for the new total
-        if (!this._productService.instock(product, newQuantity)) {
-          throw new BadRequestException('Product not in stock');
-        }
-        existingCart.products[productIndex].quantity = newQuantity;
-      } else {
-        // Product not in cart → add new one
-        existingCart.products.push({
-          productId,
-          quantity,
-          price: product.finalPrice,
-          productSize: data.productSize
-        });
-      }
-      await existingCart.save();
+ async addToCart(data: AddToCartDto, userId: Types.ObjectId) {
+  const { productId, quantity } = data;
+  const product = await this._productService.checkProductExists(productId);
+  const instock = this._productService.instock(product, quantity);
+  if (!instock) throw new BadRequestException('Product not in stock');
 
-      return {
-        data: existingCart,
-        message: 'Product added to cart successfully',
-      };
+  const existingCart = await this._cartRepository.findOne({
+    filter: { user: userId },
+  });
+
+  if (existingCart) {
+    // Find product by productId + productSize
+    const productIndex = existingCart.products.findIndex(
+      (p) =>
+        p.productId.toString() === productId.toString() &&
+        p.productSize === data.productSize
+    );
+
+    if (productIndex !== -1) {
+      // Same product & same size → increase quantity
+      const newQuantity =
+        existingCart.products[productIndex].quantity + quantity;
+
+      if (!this._productService.instock(product, newQuantity)) {
+        throw new BadRequestException('Product not in stock');
+      }
+
+      existingCart.products[productIndex].quantity = newQuantity;
+    } else {
+      // Same product but DIFFERENT size → add a new one
+      existingCart.products.push({
+        productId,
+        quantity,
+        price: product.finalPrice,
+        productSize: data.productSize,
+      });
     }
 
-    // If no cart exists → create new one
-    const newCart = await this._cartRepository.create({
-      user: userId,
-      products: [
-        {
-          productId,
-          quantity,
-          price: product.price,
-          productSize: data.productSize
-        },
-      ],
-    });
+    await existingCart.save();
 
     return {
-      data: newCart,
+      data: existingCart,
       message: 'Product added to cart successfully',
     };
   }
+
+  // No cart → create new one
+  const newCart = await this._cartRepository.create({
+    user: userId,
+    products: [
+      {
+        productId,
+        quantity,
+        price: product.finalPrice,
+        productSize: data.productSize,
+      },
+    ],
+  });
+
+  return {
+    data: newCart,
+    message: 'Product added to cart successfully',
+  };
+}
 
   async updateCart(data: UpdateCartDto, userId: Types.ObjectId) {
     const { productId, quantity } = data;
