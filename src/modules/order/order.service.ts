@@ -80,7 +80,7 @@ export class OrderService {
     }
 
     const session = await this.payWithCard(order.id, products, user.email, appliedCoupon)
-    return { data: session.url, message: 'Order created successfully' };
+    return { data: { session: session.url, order }, message: 'Order created successfully' };
   }
 
   async payWithCard(orderId, products, userEmail: string, appliedCoupon?: any) {
@@ -170,45 +170,44 @@ export class OrderService {
     return { data: order, message: 'Order updated successfully' };
   }
   async stripeWebhook(rawBody: Buffer, signature: string) {
-  // 1️⃣ Construct Stripe event
-  const event = await this._paymentService.createEvents(rawBody, signature);
+    // 1️⃣ Construct Stripe event
+    const event = await this._paymentService.createEvents(rawBody, signature);
 
-  let eventObject: any;
+    let eventObject: any;
 
-  switch (event.type) {
-    case 'checkout.session.completed':
-      eventObject = event.data.object;
-      break;
-    default:
-      console.log(`Unhandled event type: ${event.type}`);
-      return;
-  }
+    switch (event.type) {
+      case 'checkout.session.completed':
+        eventObject = event.data.object;
+        break;
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
+        return;
+    }
 
-  if (eventObject) {
-    const orderId = eventObject.metadata?.orderId; // Get metadata from Stripe event
+    if (eventObject) {
+      const orderId = eventObject.metadata?.orderId; // Get metadata from Stripe event
 
-    if (!orderId) return;
+      if (!orderId) return;
 
-    // 2️⃣ Update order as paid
-    const order = await this._orderRepository.update({
-      filter: {
-        _id: Types.ObjectId.createFromHexString(orderId),
-        paid: false,
-        paymentMethod: PaymentMethod.card,
-      },
-      update: { 
-        paid: true,
-        payment_intent: eventObject.payment_intent,
-        status: 'paid',
-        paymentDate: new Date()
-      },
-    });
+      // 2️⃣ Update order as paid
+      const order = await this._orderRepository.update({
+        filter: {
+          _id: Types.ObjectId.createFromHexString(orderId),
+          paid: false,
+          paymentMethod: PaymentMethod.card,
+        },
+        update: {
+          paid: true,
+          payment_intent: eventObject.payment_intent,
+          orderStatus: OrderStatus.completed,
+        },
+      });
 
-    // 3️⃣ Clear user cart
-    if (order) {
-      await this._cartService.clearCart(order.user);
+      // 3️⃣ Clear user cart
+      if (order) {
+        await this._cartService.clearCart(order.user);
+      }
     }
   }
-}
 
 }
