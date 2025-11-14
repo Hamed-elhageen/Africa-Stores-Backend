@@ -35,11 +35,12 @@ export class PaymentService {
         })
     }
 
-    async createEvents(body: Buffer, signature: string): Promise<Stripe.Event> {
+    async createEvents(rawBody: Buffer, signature: string): Promise<Stripe.Event> {
         return this.stripe.webhooks.constructEvent(
-            body,
+            rawBody,
             signature,
-            this.configService.get<string>('STRIPE_WEBHOOK_SECRET')!);
+            this.configService.get<string>('STRIPE_WEBHOOK_SECRET')!
+        );
     }
 
 }

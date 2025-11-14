@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Headers, Res, Req, HttpCode } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -10,6 +10,7 @@ import { Types } from 'mongoose';
 import { ObjectIdValidationPipe } from 'src/common/pipes/objectid-validation.pipe';
 import { OrderStatus } from 'src/db/models/order.model';
 import { Public } from 'src/common/decorators/auth/public.decorator';
+import type { Request, Response } from 'express';
 
 @Controller('order')
 export class OrderController {
@@ -20,11 +21,18 @@ export class OrderController {
     return this.orderService.create(data, user);
   }
   @Post("/webhook")
+  @HttpCode(200)
   @Public()
-  async stribeWebHook(@Body() data: any ,@Headers('stripe-signature') signature: string) {
-    console.log({data});
-    this.orderService.stribeWebHook(data, signature);
-    return;
+  async stripeWebhook(@Req() req: Request, @Res() res: Response, @Headers('stripe-signature') signature: string) {
+    const rawBody = req.body; // Must be a Buffer set by express.raw middleware
+
+    try {
+      await this.orderService.stripeWebhook(rawBody, signature);
+      res.json({ received: true });
+    } catch (err) {
+      console.error('Stripe Webhook Error:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
   }
 
   @Get()

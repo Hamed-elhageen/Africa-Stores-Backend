@@ -169,27 +169,46 @@ export class OrderService {
     if (!order) throw new NotFoundException('Order not found');
     return { data: order, message: 'Order updated successfully' };
   }
-  async stribeWebHook(info: any, signature: string) {
-    let event = await this._paymentService.createEvents(info, signature);
-    let eventObject;
-    switch (event.type) {
-      case 'checkout.session.completed':
-        eventObject = event.data.object;
-        break;
-    }
-    if (eventObject) {
-      const { orderId } = info.data.object.metadata;
+  async stripeWebhook(rawBody: Buffer, signature: string) {
+  // 1️⃣ Construct Stripe event
+  const event = await this._paymentService.createEvents(rawBody, signature);
 
-      const order = await this._orderRepository.update({
-        filter: {
-          _id: Types.ObjectId.createFromHexString(orderId),
-          paid: false,
-          paymentMethod: PaymentMethod.card
-        },
-        update: { paid: true, payment_intent: info.data.object.payment_intent }
-      })
-      await this._cartService.clearCart(order!.user);
-    }
+  let eventObject: any;
 
+  switch (event.type) {
+    case 'checkout.session.completed':
+      eventObject = event.data.object;
+      break;
+    default:
+      console.log(`Unhandled event type: ${event.type}`);
+      return;
   }
+
+  if (eventObject) {
+    const orderId = eventObject.metadata?.orderId; // Get metadata from Stripe event
+
+    if (!orderId) return;
+
+    // 2️⃣ Update order as paid
+    const order = await this._orderRepository.update({
+      filter: {
+        _id: Types.ObjectId.createFromHexString(orderId),
+        paid: false,
+        paymentMethod: PaymentMethod.card,
+      },
+      update: { 
+        paid: true,
+        payment_intent: eventObject.payment_intent,
+        status: 'paid',
+        paymentDate: new Date()
+      },
+    });
+
+    // 3️⃣ Clear user cart
+    if (order) {
+      await this._cartService.clearCart(order.user);
+    }
+  }
+}
+
 }
