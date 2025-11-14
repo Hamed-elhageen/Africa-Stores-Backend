@@ -205,6 +205,11 @@ export class OrderService {
 
       // 3️⃣ Clear user cart
       if (order) {
+        const cart = await this._cartService.getCart(order.user);
+        const products = cart.data.products;
+        for (const item of products) {
+          await this._productService.updateStock(item.productId, item.quantity, false);
+        }
         await this._cartService.clearCart(order.user);
       }
     }
