@@ -13,80 +13,80 @@ export class CartService {
     private readonly _productRepository: ProductRepository,
     private readonly _productService: ProductService
   ) { }
- async addToCart(data: AddToCartDto, userId: Types.ObjectId) {
-  const { productId, quantity } = data;
-  const product = await this._productService.checkProductExists(productId);
-  const instock = this._productService.instock(product, quantity);
-  if (!instock) throw new BadRequestException('Product not in stock');
+  async addToCart(data: AddToCartDto, userId: Types.ObjectId) {
+    const { productId, quantity } = data;
+    const product = await this._productService.checkProductExists(productId);
+    const instock = this._productService.instock(product, quantity);
+    if (!instock) throw new BadRequestException('Product not in stock');
 
-  const existingCart = await this._cartRepository.findOne({
-    filter: { user: userId },
-  });
+    const existingCart = await this._cartRepository.findOne({
+      filter: { user: userId },
+    });
 
-  if (existingCart) {
-    // Find product by productId + productSize
-    const productIndex = existingCart.products.findIndex(
-      (p) =>
-        p.productId.toString() === productId.toString() &&
-        p.productSize === data.productSize
-    );
+    if (existingCart) {
+      // Find product by productId + productSize
+      const productIndex = existingCart.products.findIndex(
+        (p) =>
+          p.productId.toString() === productId.toString() &&
+          p.productSize === data.productSize
+      );
 
-    if (productIndex !== -1) {
-      // Same product & same size → increase quantity
-      const newQuantity =
-        existingCart.products[productIndex].quantity + quantity;
+      if (productIndex !== -1) {
+        // Same product & same size → increase quantity
+        const newQuantity =
+          existingCart.products[productIndex].quantity + quantity;
 
-      if (!this._productService.instock(product, newQuantity)) {
-        throw new BadRequestException('Product not in stock');
+        if (!this._productService.instock(product, newQuantity)) {
+          throw new BadRequestException('Product not in stock');
+        }
+
+        existingCart.products[productIndex].quantity = newQuantity;
+      } else {
+        // Same product but DIFFERENT size → add a new one
+        existingCart.products.push({
+          productId,
+          quantity,
+          price: product.finalPrice,
+          productSize: data.productSize,
+        });
       }
 
-      existingCart.products[productIndex].quantity = newQuantity;
-    } else {
-      // Same product but DIFFERENT size → add a new one
-      existingCart.products.push({
-        productId,
-        quantity,
-        price: product.finalPrice,
-        productSize: data.productSize,
-      });
+      await existingCart.save();
+
+      return {
+        data: existingCart,
+        message: 'Product added to cart successfully',
+      };
     }
 
-    await existingCart.save();
+    // No cart → create new one
+    const newCart = await this._cartRepository.create({
+      user: userId,
+      products: [
+        {
+          productId,
+          quantity,
+          price: product.finalPrice,
+          productSize: data.productSize,
+        },
+      ],
+    });
 
     return {
-      data: existingCart,
+      data: newCart,
       message: 'Product added to cart successfully',
     };
   }
 
-  // No cart → create new one
-  const newCart = await this._cartRepository.create({
-    user: userId,
-    products: [
-      {
-        productId,
-        quantity,
-        price: product.finalPrice,
-        productSize: data.productSize,
-      },
-    ],
-  });
-
-  return {
-    data: newCart,
-    message: 'Product added to cart successfully',
-  };
-}
-
   async updateCart(data: UpdateCartDto, userId: Types.ObjectId) {
-    const { productId, quantity } = data;
+    const { productId, quantity, _id } = data;
     const product = await this._productRepository.findOne({ filter: { _id: productId } });
     if (!product) throw new NotFoundException('Product not found');
     const instock = this._productService.instock(product, quantity!);
     if (!instock) throw new BadRequestException('Product not in stock');
 
     const cart = await this._cartRepository.update({
-      filter: { user: userId, "products._id": productId },
+      filter: { user: userId, "products._id": _id },
       update: { "products.$.quantity": quantity, "products.$.price": product.finalPrice }
     });
 
