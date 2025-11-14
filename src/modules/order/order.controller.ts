@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Headers } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -9,6 +9,7 @@ import { Role } from 'src/db/enums/user.enum';
 import { Types } from 'mongoose';
 import { ObjectIdValidationPipe } from 'src/common/pipes/objectid-validation.pipe';
 import { OrderStatus } from 'src/db/models/order.model';
+import { Public } from 'src/common/decorators/auth/public.decorator';
 
 @Controller('order')
 export class OrderController {
@@ -17,6 +18,13 @@ export class OrderController {
   @Post()
   async create(@Body() data: CreateOrderDto, @CurrentUser() user: UserDocument) {
     return this.orderService.create(data, user);
+  }
+  @Post("/webhook")
+  @Public()
+  async stribeWebHook(@Body() data: any ,@Headers('stripe-signature') signature: string) {
+    console.log({data});
+    this.orderService.stribeWebHook(data, signature);
+    return;
   }
 
   @Get()

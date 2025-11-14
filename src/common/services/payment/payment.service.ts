@@ -20,7 +20,7 @@ export class PaymentService {
             line_items,
             customer_email,
             discounts,
-            success_url:this.configService.get<string>('SUCCESS_URL')!,
+            success_url: this.configService.get<string>('SUCCESS_URL')!,
             cancel_url: this.configService.get<string>('CANCEL_URL')!,
             metadata
         })
@@ -28,11 +28,18 @@ export class PaymentService {
         return session
     }
 
-    async createCoupon({currency , percent_off}:Stripe.CouponCreateParams) {
-      return this.stripe.coupons.create({
+    async createCoupon({ currency, percent_off }: Stripe.CouponCreateParams) {
+        return this.stripe.coupons.create({
             currency,
             percent_off
         })
+    }
+
+    async createEvents(body: Buffer, signature: string): Promise<Stripe.Event> {
+        return this.stripe.webhooks.constructEvent(
+            body,
+            signature,
+            this.configService.get<string>('STRIPE_WEBHOOK_SECRET')!);
     }
 
 }
