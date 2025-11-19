@@ -72,7 +72,7 @@ export class Order {
   @Prop({ type: String })
   payment_intent: string; // for stripe integration 
 
-  @Prop({ type: String })
+  @Prop({ type: String , required: false})
   coupon?: string; // Coupon code applied
 
 }

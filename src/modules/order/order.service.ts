@@ -61,6 +61,7 @@ export class OrderService {
       appliedCoupon = couponResult.data;
     }
 
+
     // create order
     const order = await this._orderRepository.create({
       ...data,
@@ -96,15 +97,20 @@ export class OrderService {
       },
       quantity: product.quantity
     }))
-    const { id } = await this._paymentService.createCoupon({
-      currency: "egp",
-      percent_off: appliedCoupon.value
-    })
+    let discountItems: any = [];
+    if (appliedCoupon) {
+      const { id } = await this._paymentService.createCoupon({
+        currency: "egp",
+        percent_off: appliedCoupon.discount || appliedCoupon.value,
+      });
+
+      discountItems = [{ coupon: id }];
+    }
     return await this._paymentService.createCheckoutSession({
       metadata: { orderId },
       customer_email: userEmail,
       line_items,
-      discounts: [{ coupon: id }]
+      discounts: discountItems,
     })
   }
 

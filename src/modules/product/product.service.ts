@@ -64,6 +64,18 @@ export class ProductService {
       updatedData.slug = slugify(updatedData.name);
     }
 
+    // Preserve or update category
+    if (updatedData.category) {
+      const categoryExists = await this._categoryRepository.findOne({
+        filter: { _id: updatedData.category }
+      });
+
+      if (!categoryExists) throw new NotFoundException("Category not found");
+    } else {
+      updatedData.category = product.category;
+    }
+
+
     // Handle thumbnail update
     if (files?.thumbnail?.length) {
       // Delete old thumbnail from cloud if needed
