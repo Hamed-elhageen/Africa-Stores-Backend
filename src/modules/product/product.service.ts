@@ -67,14 +67,16 @@ export class ProductService {
     // Preserve or update category
     if (updatedData.category) {
       const categoryExists = await this._categoryRepository.findOne({
-        filter: { _id: updatedData.category }
+        filter: { _id: updatedData.category },
       });
 
       if (!categoryExists) throw new NotFoundException("Category not found");
-    } else {
-      updatedData.category = product.category;
-    }
 
+      // Convert category to ObjectId explicitly
+      updatedData.category = new Types.ObjectId(updatedData.category);
+    } else {
+      updatedData.category = product.category; // keep original
+    }
 
     // Handle thumbnail update
     if (files?.thumbnail?.length) {
