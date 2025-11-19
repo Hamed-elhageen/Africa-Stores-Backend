@@ -52,5 +52,6 @@ export class CreateProductDto {
   sizes: ProductSizes[];
 
   @IsMongoId()
+  @IsOptional()
   category: Types.ObjectId;
 }
