@@ -34,14 +34,14 @@ export class OrderService {
       if (!this._productService.instock(prod, product.quantity)) {
         throw new BadRequestException(`Product ${prod.name} is not in stock `);
       }
-      totalPrice += prod.finalPrice * product.quantity;
+      totalPrice += Number((prod.finalPrice * product.quantity).toFixed(2));
       products.push({
         productId: prod._id,
         name: prod.name,
-        price: prod.finalPrice,
+        price: Number(prod.finalPrice.toFixed(2)),
         quantity: product.quantity,
         discount: prod.discount,
-        subtotal: product.subtotal,
+        subtotal: Number(product.subtotal.toFixed(2)),
         image: prod.thumbnail.secure_url
       });
     }
@@ -56,8 +56,9 @@ export class OrderService {
         code: data.couponCode,
         total: totalPrice
       });
-      discount = couponResult.data.discount;
-      finalTotal = couponResult.data.finalTotal;
+
+      discount = Number(couponResult.data.discount.toFixed(2));
+      finalTotal = Number(couponResult.data.finalTotal.toFixed(2));
       appliedCoupon = couponResult.data;
     }
 
@@ -93,7 +94,7 @@ export class OrderService {
           images: [product.image]
         },
 
-        unit_amount: product.price * 100
+        unit_amount: Number((product.price * 100).toFixed(0))
       },
       quantity: product.quantity
     }))
@@ -101,7 +102,7 @@ export class OrderService {
     if (appliedCoupon) {
       const { id } = await this._paymentService.createCoupon({
         currency: "egp",
-        percent_off: appliedCoupon.discount || appliedCoupon.value,
+        percent_off: Number((appliedCoupon.discount).toFixed(0)),
       });
 
       discountItems = [{ coupon: id }];
