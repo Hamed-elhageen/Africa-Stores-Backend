@@ -99,10 +99,11 @@ export class OrderService {
       quantity: product.quantity
     }))
     let discountItems: any = [];
+    console.log(appliedCoupon);
     if (appliedCoupon) {
       const { id } = await this._paymentService.createCoupon({
         currency: "egp",
-        percent_off: Number((appliedCoupon.discount).toFixed(0)),
+        percent_off: Number((appliedCoupon.value).toFixed(0)),
       });
 
       discountItems = [{ coupon: id }];
