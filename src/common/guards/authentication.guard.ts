@@ -45,7 +45,7 @@ export class AuthGuard implements CanActivate {
         catch (error) {
             // console.log(error);
             if (error.name === 'TokenExpiredError') {
-                throw new UnauthorizedException('Token expired');
+                throw new UnauthorizedException('Token expired You need to login again to access this feature');
             }
             if (error.name === 'JsonWebTokenError') {
                 throw new UnauthorizedException('Invalid token');

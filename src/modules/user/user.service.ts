@@ -26,7 +26,7 @@ export class UserService {
     const { email, password } = data;
     const user = await this._UserRepository.findOne({ filter: { email } })
     if (!user || !compareHash(password, user.password)) {
-      throw new UnauthorizedException("Invalid credentials")
+      throw new UnauthorizedException("Invalid username or password");
     }
     return user;
   }
