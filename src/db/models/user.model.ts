@@ -33,7 +33,7 @@ export class User {
     @Prop({
         type: raw({ secure_url: { type: String }, public_id: { type: String } }),
         default: {
-            secure_url: 'https://res.cloudinary.com/dheffyjlk/image/upload/v1739782974/xu3ltoptgjv2nylegwxh.png',
+            secure_url: 'https://res.cloudinary.com/dheffyjlk/image/upload/v1739782608/default_mpkkic.png',
             public_id: ''
         }
     })
